@@ -141,7 +141,7 @@ class Account():
             modifers_final = None           
         
         # Если нет запроса на связанные аккаунты, то берем только свой
-        if 'Аккаунт' not in modifers_final:
+        if 'Аккаунт' not in modifers_final and 'Вместе' not in modifers_final:
             linked_accounts = [self.user_id]
             
         # получение данных   
@@ -167,9 +167,10 @@ class Account():
        
         # корректировка и вывод результатов        
         if 'Вместе' in modifers_final:
-            modifers_final.remove('Вместе')       
-            modifers_final.remove('Аккаунт')  
-        if 'Все' in modifers_final:
+            modifers_final.remove('Вместе') 
+            if 'Аккаунт' in modifers_final:
+                modifers_final.remove('Аккаунт')
+        if 'Все' in modifers_final or len(modifers_final) == 0:
             df_string = df.to_string(index = False, justify = 'left')
             df_string = re.sub('\n\s+', '\n', df_string)
         else:            
