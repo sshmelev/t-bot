@@ -18,7 +18,8 @@ class Analyzer():
     MODIFER_LIST = {'get_date' : ['дате','дату','датам'], 
                     'get_category' : ['категории', 'группе', 'категориям', 'группам'],
                     'get_all' : ['все','всё','полностью'],
-                    'get_linked_account' : ['связанные','доступные']
+                    'get_together': ['вместе'],
+                    'get_linked' : ['связанные','доступные']
                    }
     
     MESSAGES = {'mode_data_recording': 'Запись расходов.',
