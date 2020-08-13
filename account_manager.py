@@ -14,7 +14,9 @@ class Account():
                 'account_link_delete': 'Ссылка на аккаунт удалена.',
                 'account_link_error': 'Ошибка: действие не выполнено.',
                 'cancel_complete': 'Последняя запись отменена.',
-                'cancel_error': 'Ошибка: последняя запись не отменена.'
+                'cancel_error': 'Ошибка: последняя запись не отменена.',
+                'clear_complete': 'База очищена.',
+                'clear_error': 'Ошибка: база не очищена.'
                }
     
     MODIFER_FIELDS = {'get_date' : ['Дата'], 
@@ -33,7 +35,8 @@ class Account():
         else:
             conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
             c = conn.cursor()
-            c.execute('''CREATE TABLE finance (            
+            c.execute('''CREATE TABLE finance (       
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             date     DATETIME,
                             category VARCHAR (100),
                             expenses INTEGER,
@@ -152,7 +155,7 @@ class Account():
             c = conn.cursor()
             for row in c.execute('''SELECT date, category, expenses, description, '{}' as account
                                             FROM finance
-                                            order by date DESC, category ASC, expenses DESC'''.format(account)):
+                                            ORDER BY date DESC, category ASC, expenses DESC'''.format(account)):
                 date_data = str(row[0])
                 category_data = str(row[1])
                 expense_data = row[2]    
@@ -197,3 +200,14 @@ class Account():
             return self.MESSAGES['cancel_complete']
         except: 
             return self.MESSAGES['cancel_error']
+        
+    def clear_expense(self):
+        try:
+            conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
+            c = conn.cursor()
+            c.execute('''DELETE FROM finance;''')
+            conn.commit()
+            conn.close()        
+            return self.MESSAGES['clear_complete']
+        except: 
+            return self.MESSAGES['clear_error']        
