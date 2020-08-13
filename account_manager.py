@@ -80,39 +80,45 @@ class Account():
     def account_link(self, linked_account, mode):
         if mode == 'create_link':
             try:
-                conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
-                c = conn.cursor()
-                c.execute('''INSERT INTO config (
-                                        parameter,
-                                        value
-                                    )
-                                    VALUES (
-                                        '{0}',
-                                        '{1}'
-                                    );'''.format(
-                                                 'linked_account', 
-                                                 linked_account
-                                                ))
-                conn.commit()
-                conn.close()
-                return self.MESSAGES['account_link_add']
+                if os.path.exists('.\data\{}.db'.format(linked_account)):
+                    conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
+                    c = conn.cursor()
+                    c.execute('''INSERT INTO config (
+                                            parameter,
+                                            value
+                                        )
+                                        VALUES (
+                                            '{0}',
+                                            '{1}'
+                                        );'''.format(
+                                                     'linked_account', 
+                                                     linked_account
+                                                    ))
+                    conn.commit()
+                    conn.close()
+                    return self.MESSAGES['account_link_add']
+                else:
+                    return self.MESSAGES['account_link_error'] 
             except: 
                 return self.MESSAGES['account_link_error']
         elif mode == 'drop_link':
             try:
-                conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
-                c = conn.cursor()
-                c.execute('''DELETE FROM config 
-                                    WHERE
-                                    parameter = '{0}' AND
-                                    value = '{1}'
-                                    ;'''.format(
-                                                 'linked_account', 
-                                                 linked_account
-                                                ))
-                conn.commit()
-                conn.close()
-                return self.MESSAGES['account_link_delete']
+                if os.path.exists('.\data\{}.db'.format(linked_account)):
+                    conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
+                    c = conn.cursor()
+                    c.execute('''DELETE FROM config 
+                                        WHERE
+                                        parameter = '{0}' AND
+                                        value = '{1}'
+                                        ;'''.format(
+                                                     'linked_account', 
+                                                     linked_account
+                                                    ))
+                    conn.commit()
+                    conn.close()
+                    return self.MESSAGES['account_link_delete']
+                else:
+                    return self.MESSAGES['account_link_error'] 
             except: 
                 return self.MESSAGES['account_link_error']
         else:
@@ -132,17 +138,18 @@ class Account():
             linked_accounts.append(str(row[0]))
         conn.close()
         
-        # получение списка связанных аккаунтов связанных аккаунтов
+        # получение списка взаимно связанных аккаунтов
         checked_linked_accounts = [self.user_id]
         for account in linked_accounts:
-            conn = sqlite3.connect('.\data\{}.db'.format(account))
-            c = conn.cursor()
-            for row in c.execute('''SELECT DISTINCT value
-                                            FROM config
-                                            WHERE parameter = 'linked_account' '''.format(account)):
-                if str(row[0]) == self.user_id:  # связанный аккаунт связанного аккаунта сравниваем с аккаунтом пользователя
-                    checked_linked_accounts.append(account) # если есть, то добавляем в список проверенных. цель - оставить только взаимо связанные аккаунты                
-            conn.close()
+            if os.path.exists('.\data\{}.db'.format(account)):
+                conn = sqlite3.connect('.\data\{}.db'.format(account))
+                c = conn.cursor()
+                for row in c.execute('''SELECT DISTINCT value
+                                                FROM config
+                                                WHERE parameter = 'linked_account' '''.format(account)):
+                    if str(row[0]) == self.user_id:  # связанный аккаунт связанного аккаунта сравниваем с аккаунтом пользователя
+                        checked_linked_accounts.append(account) # если есть, то добавляем в список проверенных. цель - оставить только взаимо связанные аккаунты                
+                conn.close()
         
         # подготовка списка полей для группировки результатов
         modifers_final = []
@@ -160,7 +167,7 @@ class Account():
         # Если нет запроса на связанные аккаунты, то берем только свой
         if 'Аккаунт' not in modifers_final and 'Вместе' not in modifers_final:
             checked_linked_accounts = [self.user_id]
-            
+         
         # получение данных   
         for account in checked_linked_accounts:
             conn = sqlite3.connect('.\data\{}.db'.format(account))
