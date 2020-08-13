@@ -78,7 +78,7 @@ class Account():
             return self.MESSAGES['error_expense_add']
     
     def account_link(self, linked_account, mode):
-        if mode == 'add':
+        if mode == 'create_link':
             try:
                 conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
                 c = conn.cursor()
@@ -98,7 +98,7 @@ class Account():
                 return self.MESSAGES['account_link_add']
             except: 
                 return self.MESSAGES['account_link_error']
-        elif mode == 'delete':
+        elif mode == 'drop_link':
             try:
                 conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
                 c = conn.cursor()
@@ -130,7 +130,19 @@ class Account():
                                         FROM config
                                         WHERE parameter = 'linked_account'  '''):
             linked_accounts.append(str(row[0]))
-        conn.close()   
+        conn.close()
+        
+        # получение списка связанных аккаунтов связанных аккаунтов
+        checked_linked_accounts = [self.user_id]
+        for account in linked_accounts:
+            conn = sqlite3.connect('.\data\{}.db'.format(account))
+            c = conn.cursor()
+            for row in c.execute('''SELECT DISTINCT value
+                                            FROM config
+                                            WHERE parameter = 'linked_account' '''.format(account)):
+                if str(row[0]) == self.user_id:  # связанный аккаунт связанного аккаунта сравниваем с аккаунтом пользователя
+                    checked_linked_accounts.append(account) # если есть, то добавляем в список проверенных. цель - оставить только взаимо связанные аккаунты                
+            conn.close()
         
         # подготовка списка полей для группировки результатов
         modifers_final = []
@@ -147,10 +159,10 @@ class Account():
         
         # Если нет запроса на связанные аккаунты, то берем только свой
         if 'Аккаунт' not in modifers_final and 'Вместе' not in modifers_final:
-            linked_accounts = [self.user_id]
+            checked_linked_accounts = [self.user_id]
             
         # получение данных   
-        for account in linked_accounts:
+        for account in checked_linked_accounts:
             conn = sqlite3.connect('.\data\{}.db'.format(account))
             c = conn.cursor()
             for row in c.execute('''SELECT date, category, expenses, description, '{}' as account

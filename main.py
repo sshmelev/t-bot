@@ -50,10 +50,14 @@ def main(message):
     # очистка базы
     elif 'clear' in output_code:
         logging.info('\n > user:' + str(message.from_user.id) + '\n > clear: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
-        bot.send_message(message.from_user.id, account_manager.Account(message.from_user.id).clear_expense(), reply_markup = keyboard) 
+        bot.send_message(message.from_user.id, account_manager.Account(message.from_user.id).clear_expense(), reply_markup = keyboard)
+    # создание или удаление связи аккаунтов
+    elif len(re.findall(r'_link', str(output_code))) > 0:
+        logging.info('\n > user:' + str(message.from_user.id) + '\n > link: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
+        bot.send_message(message.from_user.id, account_manager.Account(message.from_user.id).account_link(output_data, output_code), reply_markup = keyboard)  
     else:
         logging.info('\n > user:' + str(message.from_user.id) + '\n > other: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
-        bot.send_message(message.from_user.id, output_message, reply_markup = keyboard)   
+        bot.send_message(message.from_user.id, output_message, reply_markup = keyboard) 
 
 if __name__ == '__main__':
 	bot.polling(none_stop=True, interval=0)

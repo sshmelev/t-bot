@@ -8,7 +8,8 @@ class Analyzer():
     WELCOME_LIST = ['привет','хай','добрый день','здравствуйте']
     GET_LIST = ['получить','показать','затраты','охуеть', 'посмотреть', 'вывести','показать по категории', 'показать по дате', 'показать по дате и категории', 'показать по категории и дате']
     CLEAR_LIST = ['очистить','удалить','стереть']
-    CREATE_LINK_LIST = ['связать','добавить']
+    CREATE_LINK_LIST = ['связать']
+    DROP_LINK_LIST = ['отвязать']
     CANCEL_LIST = ['отменить','отмена']
     
     CATEGORY_LIST = {'продукты' : ['пятерочка','лента','перекресток','продукты','еда','корм'], 
@@ -35,7 +36,9 @@ class Analyzer():
                 'error_invalid_input_data': 'Ошибка: некорректные входные данные.',
                 'error_invalid_command': 'Ошибка: некорректная команда.',
                 'error_category_detector': 'Ошибка: категория не определена.',
-                'mode_command_processing_cancel': 'Последняя запись отменена.'
+                'mode_command_processing_cancel': 'Последняя запись отменена.',
+                'mode_command_processing_create_link': 'Добавлен связанный аккаунт.',
+                'mode_command_processing_drop_link': 'Удален связанный аккаунт.'
                }
     
     # определяет категорию расходов по ключевому слову
@@ -64,7 +67,8 @@ class Analyzer():
         date = str(datetime.now().date()) # текущая дата
         find_digit = re.findall(r'\d+', string) # поиск чисел
         find_text = re.findall(r'[A-zА-я]+', string) # поиск слов
-        if len(find_digit)>0 and len(find_text)>0: # если есть и числа и слова
+        # если есть и числа и слова и слова не входят в списки ключевых слов управления связью аккаунтов (т.к. там будет id аккаунта)
+        if len(find_digit)>0 and len(find_text)>0 and len(set(find_text) & (set(self.DROP_LINK_LIST) | set(self.CREATE_LINK_LIST))) == 0:
             result.append(self.MESSAGES['mode_data_recording']) # print('Режим 1. Запись расходов.')
             category_list = [] # хранилище под найденные категории
             expense = find_digit[0] # первое выделенное число (аналируем только его, все остальные идут в описание)
@@ -112,6 +116,14 @@ class Analyzer():
                 elif word in self.CANCEL_LIST:
                     result.append(self.MESSAGES['mode_command_processing_cancel']) # print('Режим 2.3. Удаление данных.')
                     return result, data, 'cancel'
+                elif word in self.CREATE_LINK_LIST:
+                    data.append(find_digit[0])
+                    result.append(self.MESSAGES['mode_command_processing_create_link']) # print('Режим 2.3. Удаление данных.')
+                    return result, data, 'create_link'
+                elif word in self.DROP_LINK_LIST:
+                    data.append(find_digit[0])
+                    result.append(self.MESSAGES['mode_command_processing_drop_link']) # print('Режим 2.3. Удаление данных.')
+                    return result, data, 'drop_link'
                 else:
                     result.append(self.MESSAGES['error_invalid_command'])
                     return result, ValueError, 'error'
