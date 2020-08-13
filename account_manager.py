@@ -12,7 +12,9 @@ class Account():
                 'error_expense_add': 'Ошибка: запись не добавлена.',
                 'account_link_add': 'Ссылка на аккаунт добавлена.',
                 'account_link_delete': 'Ссылка на аккаунт удалена.',
-                'account_link_error': 'Ошибка: действие не выполнено.'
+                'account_link_error': 'Ошибка: действие не выполнено.',
+                'cancel_complete': 'Последняя запись отменена.',
+                'cancel_error': 'Ошибка: последняя запись не отменена.'
                }
     
     MODIFER_FIELDS = {'get_date' : ['Дата'], 
@@ -181,3 +183,17 @@ class Account():
                                 
         df_string_corrected = '`' + df_string + '`'
         return df_string_corrected
+    
+    def cancel_expense(self):
+        try:
+            conn = sqlite3.connect('.\data\{}.db'.format(self.user_id))
+            c = conn.cursor()
+            c.execute('''DELETE FROM finance
+                         WHERE ID = (SELECT max(id)
+                                     FROM finance
+                                     );''')
+            conn.commit()
+            conn.close()        
+            return self.MESSAGES['cancel_complete']
+        except: 
+            return self.MESSAGES['cancel_error']

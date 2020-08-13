@@ -42,7 +42,11 @@ def main(message):
     # иначе, если есть запросы на получение данных выдаем результат и клавиатуру с запросами
     elif len(re.findall(r'get_', str(output_code))) > 0:
         logging.info('\n > user:' + str(message.from_user.id) + '\n > get: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
-        bot.send_message(message.from_user.id, account_manager.Account(message.from_user.id).get_expense(output_code), reply_markup = keyboard)        
+        bot.send_message(message.from_user.id, account_manager.Account(message.from_user.id).get_expense(output_code), reply_markup = keyboard)    
+    # удаление последней добавленной записи    
+    elif 'cancel' in output_code:
+        logging.info('\n > user:' + str(message.from_user.id) + '\n > cancel: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
+        bot.send_message(message.from_user.id, output_message + '\n\n' + account_manager.Account(message.from_user.id).cancel_expense(), reply_markup = keyboard)        
     else:
         logging.info('\n > user:' + str(message.from_user.id) + '\n > other: ' + str(output_code) + '\n > message: ' + message.text.lower() + '\n')
         bot.send_message(message.from_user.id, output_message, reply_markup = keyboard)   
