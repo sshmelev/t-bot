@@ -126,7 +126,7 @@ class Account():
         
     def get_expense(self, modifers):
         
-        linked_accounts = [self.user_id]
+        linked_accounts = []
         result = []
         
         # получение списка связанных аккаунтов
@@ -139,18 +139,20 @@ class Account():
         conn.close()
         
         # получение списка взаимно связанных аккаунтов
-        checked_linked_accounts = [self.user_id]
+        checked_linked_accounts = []
         for account in linked_accounts:
             if os.path.exists('.\data\{}.db'.format(account)):
                 conn = sqlite3.connect('.\data\{}.db'.format(account))
                 c = conn.cursor()
                 for row in c.execute('''SELECT DISTINCT value
                                                 FROM config
-                                                WHERE parameter = 'linked_account' '''.format(account)):
-                    if str(row[0]) == self.user_id:  # связанный аккаунт связанного аккаунта сравниваем с аккаунтом пользователя
-                        checked_linked_accounts.append(account) # если есть, то добавляем в список проверенных. цель - оставить только взаимо связанные аккаунты                
+                                                WHERE parameter = 'linked_account' '''):
+                    if int(row[0]) == self.user_id:  # связанный аккаунт связанного аккаунта сравниваем с аккаунтом пользователя
+                        checked_linked_accounts.append(int(account)) # если есть, то добавляем в список проверенных. цель - оставить только взаимо связанные аккаунты               
                 conn.close()
-        
+
+        checked_linked_accounts.append(self.user_id) # добавляем аккаунт пользователя
+
         # подготовка списка полей для группировки результатов
         modifers_final = []
         if type(modifers) == str:
@@ -229,4 +231,4 @@ class Account():
             conn.close()        
             return self.MESSAGES['clear_complete']
         except: 
-            return self.MESSAGES['clear_error']        
+            return self.MESSAGES['clear_error']
