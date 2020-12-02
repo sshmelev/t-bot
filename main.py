@@ -1,5 +1,5 @@
 import telebot
-bot = telebot.TeleBot('1309448728:AAGXlgsv1cXqbPMTVNL-yq5UnhbbJgoUqqM', parse_mode='MARKDOWN')
+bot = telebot.TeleBot('', parse_mode='MARKDOWN')
 
 from telebot import types
 
